@@ -13,11 +13,14 @@ class FinRAGVectorStore:
     def __init__(self):
         """
         Step 3: Embedding & Vector Storage interface.
+        Auto-creates the collection if it doesn't exist.
         """
         self.embedding = get_huggingface_embeddings()
-        
-        # Initialize connection
-        # autodetect behavior: Use content_field explicit for empty DB support
+
+        # Pre-create the collection via astrapy if it doesn't exist
+        self._ensure_collection_exists()
+
+        # Initialize LangChain vectorstore wrapper
         self.vectorstore = AstraDBVectorStore(
             embedding=self.embedding,
             collection_name=COLLECTION_NAME,
@@ -26,6 +29,34 @@ class FinRAGVectorStore:
             autodetect_collection=False,
             content_field="page_content"
         )
+
+    def _ensure_collection_exists(self):
+        """Create the AstraDB collection if it doesn't already exist."""
+        try:
+            from astrapy import DataAPIClient
+
+            client = DataAPIClient(ASTRA_DB_APPLICATION_TOKEN)
+            db = client.get_database(ASTRA_DB_API_ENDPOINT)
+
+            existing = [c.name for c in db.list_collections()]
+            if COLLECTION_NAME not in existing:
+                print(f"Creating AstraDB collection '{COLLECTION_NAME}' (384 dims)...")
+                
+                # Use astrapy 2.1 compliant syntax for definition and indexing defaults
+                db.create_collection(
+                    COLLECTION_NAME,
+                    definition={
+                        "vector": {
+                            "dimension": 384,
+                            "metric": "cosine"
+                        }
+                    }
+                )
+                print(f"Collection '{COLLECTION_NAME}' created successfully.")
+            else:
+                print(f"Collection '{COLLECTION_NAME}' already exists.")
+        except Exception as e:
+            print(f"Warning: Could not verify/create collection: {e}")
 
     def add_documents(self, documents: List[Document]):
         """

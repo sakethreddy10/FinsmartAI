@@ -16,7 +16,7 @@ class IngestResponse(BaseModel):
 class QueryRequest(BaseModel):
     session_id: str
     question: str
-    user_id: Optional[str] = "user_default"
+    user_id: Optional[str] = "default_user"
 
 class QueryResponse(BaseModel):
     answer: str

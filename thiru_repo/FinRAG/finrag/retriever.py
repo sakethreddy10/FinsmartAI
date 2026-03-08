@@ -16,9 +16,9 @@ class FinRAGRetriever:
         # Consistent Retrieval Setting
         # Increased k=5 for better context coverage with Nemotron
         k = 5
-        score_threshold = 0.35
+        score_threshold = 0.0 # Disabled strict threshold, let Vector DB sort by top k natively
         
-        # Metadata Filters (Step 3 Requirement)
+        # Metadata Filters (LangChain requires root level keys for top-level metadata)
         filter_dict = {
             "user_id": user_id,
             "session_id": session_id

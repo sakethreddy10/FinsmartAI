@@ -4,12 +4,11 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 
-# Load Env Vars from FinRAG/.env where keys are stored
-# Adjust path relative to this file or CWD
-env_path = os.path.join(os.path.dirname(__file__), "../FinRAG/.env")
-load_dotenv(dotenv_path=env_path)
-# Also try to load strictly if above doesn't work (for CWD execution)
-load_dotenv("FinRAG/.env")
+# Load Env Vars — local .env first (has all keys including AstraDB),
+# then FinRAG/.env as fallback for any extras. override=False means
+# the first-loaded value wins, so local .env takes priority.
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "../thiru_repo/FinRAG/.env"), override=False)
 
 # Import Routers AFTER loading env
 from routers import rag_routes, finance_routes, sentiment_routes, budget_routes, portfolio_routes

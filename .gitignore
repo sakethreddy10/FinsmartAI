@@ -46,9 +46,10 @@ package-lock.json
 # Byte-compiled
 *.pyc
 
-# Environment files
+# Environment files — catch ALL .env files project-wide
 .env
-FinSmartBackend/.env
+**/.env
+*.env
 
 # Error logs
 error*.log

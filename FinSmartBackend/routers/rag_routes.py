@@ -18,30 +18,32 @@ from finrag.prompt_templates import FINRAG_PROMPT
 
 router = APIRouter()
 
-# Initialize Components
-# Define as None initially to prevent NameError
-vs = None
-retriever_obj = None
-llm = None
+# ── Lazy-initialized singletons ──
+_rag_components = {"vs": None, "retriever": None, "llm": None}
 
-try:
-    vs = FinRAGVectorStore()
-    retriever_obj = FinRAGRetriever(vs)
-    llm = get_llm() # This loads Nvidia NIM
-except Exception as e:
-    print(f"Error initializing FinRAG components: {e}")
-    # We don't crash, but endpoints might fail
+def _get_rag_components():
+    """Lazy-init RAG components on first query (avoids startup crash)."""
+    if _rag_components["retriever"] is None or _rag_components["llm"] is None:
+        try:
+            vs = FinRAGVectorStore()
+            _rag_components["vs"] = vs
+            _rag_components["retriever"] = FinRAGRetriever(vs)
+            _rag_components["llm"] = get_llm()
+            print("✅ RAG components initialized successfully.")
+        except Exception as e:
+            print(f"❌ Error initializing RAG components: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail=f"RAG components failed to initialize: {str(e)}"
+            )
+    return _rag_components["retriever"], _rag_components["llm"]
+
 
 @router.post("/ingest", response_model=IngestResponse)
 async def ingest_document(
     file: UploadFile = File(...), 
     user_id: str = Form("default_user")
 ):
-    # Check dependencies (ingest uses vectorstore internally via ingest_file -> FinRAGVectorStore)
-    # But ingest_file imports FinRAGVectorStore class and instantiates it.
-    # So we don't strictly need 'vs' here, but it's good practice to ensure DB connectivity.
-    pass 
-
     try:
         session_id = str(uuid.uuid4())
         
@@ -53,16 +55,8 @@ async def ingest_document(
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
-        # Ingest
-        # FinRAG ingest logic expects a file-like or path? 
-        # ingest_file in FinRAG expects (file_obj, filename, user_id, session_id)
-        # It reads file_obj.name. Let's check ingest_service.py signature if I could.
-        # Assuming it handles file path or I can pass the opened file
-        
+        # Ingest via FinRAG pipeline
         with open(temp_path, "rb") as f:
-            # We need to mock a file object that has .name attribute if required
-            # The ingest_service.py I saw earlier uses `ingest_file(uploaded_file, uploaded_file.name, ...)`
-            # So I should pass the open file and explicit name
             count = ingest_file(f, file.filename, user_id, session_id)
             
         # Cleanup
@@ -82,9 +76,9 @@ async def query_document(request: QueryRequest):
     try:
         if not request.session_id:
             raise HTTPException(status_code=400, detail="Session ID is required")
-            
-        if not retriever_obj or not llm:
-             raise HTTPException(status_code=503, detail="RAG components not initialized. Check server logs.")
+        
+        # Lazy-init on first query
+        retriever_obj, llm = _get_rag_components()
 
         # Retrieval
         retrieved_docs = retriever_obj.retrieve(request.question, request.user_id, request.session_id)
@@ -115,5 +109,7 @@ async def query_document(request: QueryRequest):
             sources=list(set(sources))
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Query failed: {str(e)}")
