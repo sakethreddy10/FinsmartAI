@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Search, TrendingUp, Clock, BarChart3, AlertTriangle, ChevronRight, Cpu, FileText, LineChart } from 'lucide-react';
+import { Search, TrendingUp, Clock, BarChart3, AlertTriangle, ChevronRight, Cpu, FileText, LineChart, ShieldCheck } from 'lucide-react';
 
 const POPULAR_STOCKS = [
     { symbol: 'RELIANCE.NS', name: 'Reliance Industries', market: '🇮🇳 NSE' },
@@ -11,45 +11,27 @@ const POPULAR_STOCKS = [
     { symbol: 'HINDUNILVR.NS', name: 'Hindustan Unilever', market: '🇮🇳 NSE' },
     { symbol: 'ITC.NS', name: 'ITC Limited', market: '🇮🇳 NSE' },
     { symbol: 'SBIN.NS', name: 'State Bank of India', market: '🇮🇳 NSE' },
-    { symbol: 'BHARTIARTL.NS', name: 'Bharti Airtel', market: '🇮🇳 NSE' },
-    { symbol: 'WIPRO.NS', name: 'Wipro', market: '🇮🇳 NSE' },
-    { symbol: 'TATAMOTORS.NS', name: 'Tata Motors', market: '🇮🇳 NSE' },
-    { symbol: 'MARUTI.NS', name: 'Maruti Suzuki', market: '🇮🇳 NSE' },
-    { symbol: 'SUNPHARMA.NS', name: 'Sun Pharma', market: '🇮🇳 NSE' },
-    { symbol: 'TITAN.NS', name: 'Titan Company', market: '🇮🇳 NSE' },
-    { symbol: 'BAJFINANCE.NS', name: 'Bajaj Finance', market: '🇮🇳 NSE' },
-    { symbol: 'HCLTECH.NS', name: 'HCL Technologies', market: '🇮🇳 NSE' },
-    { symbol: 'LT.NS', name: 'Larsen & Toubro', market: '🇮🇳 NSE' },
-    { symbol: 'ADANIENT.NS', name: 'Adani Enterprises', market: '🇮🇳 NSE' },
-    { symbol: 'ONGC.NS', name: 'ONGC', market: '🇮🇳 NSE' },
-    { symbol: 'NTPC.NS', name: 'NTPC Limited', market: '🇮🇳 NSE' },
     { symbol: 'AAPL', name: 'Apple Inc.', market: '🇺🇸 NASDAQ' },
     { symbol: 'MSFT', name: 'Microsoft', market: '🇺🇸 NASDAQ' },
     { symbol: 'GOOGL', name: 'Alphabet (Google)', market: '🇺🇸 NASDAQ' },
-    { symbol: 'AMZN', name: 'Amazon', market: '🇺🇸 NASDAQ' },
     { symbol: 'NVDA', name: 'NVIDIA', market: '🇺🇸 NASDAQ' },
     { symbol: 'TSLA', name: 'Tesla', market: '🇺🇸 NASDAQ' },
-    { symbol: 'META', name: 'Meta Platforms', market: '🇺🇸 NASDAQ' },
-    { symbol: 'JPM', name: 'JPMorgan Chase', market: '🇺🇸 NYSE' },
     { symbol: 'V', name: 'Visa Inc.', market: '🇺🇸 NYSE' },
-    { symbol: 'NFLX', name: 'Netflix', market: '🇺🇸 NASDAQ' },
 ];
 
 const ANALYSIS_STEPS = [
-    { label: 'Research', icon: Search, desc: 'Scraping news & market data' },
-    { label: 'Financial Analysis', icon: LineChart, desc: 'Computing valuations & ratios' },
-    { label: 'Filing Review', icon: FileText, desc: 'Analyzing earnings & filings' },
-    { label: 'Report Generation', icon: Cpu, desc: 'Writing investment recommendation' },
+    { label: 'Data Retrieval', icon: Search, desc: 'Scraping real-time news & market feeds' },
+    { label: 'Quantitative Analysis', icon: LineChart, desc: 'Computing valuations & PE ratios' },
+    { label: 'Qualitative Review', icon: FileText, desc: 'Analyzing earnings call transcripts' },
+    { label: 'Synthesis', icon: Cpu, desc: 'Generating final investment thesis' },
 ];
 
-// Parse markdown into sections for structured display
 function parseSections(text) {
     if (!text || text.length < 200) return null;
 
-    // Split by markdown headers (## or #)
     const lines = text.split('\n');
     const sections = [];
-    let current = { title: 'Overview', content: [] };
+    let current = { title: 'Executive Summary', content: [] };
 
     for (const line of lines) {
         const h1Match = line.match(/^#\s+(.+)/);
@@ -57,7 +39,7 @@ function parseSections(text) {
         const h3Match = line.match(/^###\s+(.+)/);
 
         if (h1Match || h2Match) {
-            if (current.content.length > 0 || current.title !== 'Overview') {
+            if (current.content.length > 0 || current.title !== 'Executive Summary') {
                 sections.push({ ...current, content: current.content.join('\n') });
             }
             current = { title: (h1Match || h2Match)[1].trim(), content: [] };
@@ -102,10 +84,9 @@ function StockAnalyzer() {
             setElapsed(0);
             setActiveStep(0);
             timerRef.current = setInterval(() => setElapsed(p => p + 1), 1000);
-            // Simulate step progression
             stepRef.current = setInterval(() => {
                 setActiveStep(p => (p < 3 ? p + 1 : p));
-            }, 20000);
+            }, 25000); // Slower simulated steps for realism
         } else {
             clearInterval(timerRef.current);
             clearInterval(stepRef.current);
@@ -138,7 +119,7 @@ function StockAnalyzer() {
             });
             if (!res.ok) {
                 const err = await res.json();
-                throw new Error(err.detail || 'Analysis failed.');
+                throw new Error(err.detail || 'Analysis failed to execute.');
             }
             const data = await res.json();
             setResult(data);
@@ -153,29 +134,23 @@ function StockAnalyzer() {
     const sections = result?.analysis ? parseSections(result.analysis) : null;
 
     return (
-        <div className="container">
-            {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                <div className="badge badge-purple" style={{ marginBottom: '1rem' }}>
-                    <BarChart3 size={13} /> CrewAI + Nvidia Llama 3.3 70B
+        <div className="container page-wrapper">
+            <div className="text-center animate-fade-1" style={{ marginBottom: '3.5rem', maxWidth: '800px', margin: '0 auto 3.5rem' }}>
+                <div className="badge badge-purple mb-3">
+                    <Cpu size={14} /> Multi-Agent AI Research
                 </div>
-                <h1 className="page-title" style={{ fontSize: '2.2rem' }}>Stock Intelligence Analyst</h1>
-                <p className="page-subtitle" style={{ margin: '0.5rem auto 0', textAlign: 'center' }}>
-                    Multi-agent AI research team for professional investment analysis.
+                <h1 className="page-title">Stock Intelligence</h1>
+                <p className="page-subtitle" style={{ margin: '0 auto' }}>
+                    Deploy our elite AI research team to analyze technicals, fundamentals, and market sentiment to generate institutional-grade investment reports.
                 </p>
             </div>
 
             {/* Search Panel */}
-            <div className="glass-card-static" style={{ maxWidth: '780px', margin: '0 auto 2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
-                    <TrendingUp size={18} color="var(--accent-color)" />
-                    <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Select a Stock</span>
-                </div>
-
-                <form onSubmit={handleAnalyze} style={{ display: 'flex', gap: '0.75rem' }}>
-                    <div ref={dropdownRef} style={{ flex: 1, position: 'relative' }}>
+            <div className="glass-panel animate-fade-2" style={{ maxWidth: '800px', margin: '0 auto 2.5rem', padding: '2rem', overflow: 'visible' }}>
+                <form onSubmit={handleAnalyze} style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div ref={dropdownRef} style={{ flex: 1, position: 'relative', minWidth: '250px', zIndex: 100 }}>
                         <div style={{ position: 'relative' }}>
-                            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
+                            <Search size={20} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
                             <input
                                 type="text"
                                 value={searchQuery}
@@ -186,41 +161,41 @@ function StockAnalyzer() {
                                     if (v && !v.includes('(')) setTicker(v);
                                 }}
                                 onFocus={() => setShowDropdown(true)}
-                                placeholder="Search stocks... (e.g. Infosys, AAPL)"
+                                placeholder="Search ticker symbol (e.g., TSLA, INFY.NS)"
                                 className="input-control"
-                                style={{ paddingLeft: '38px', height: '48px' }}
+                                style={{ paddingLeft: '48px', height: '56px', fontSize: '1.1rem', borderRadius: '12px' }}
                                 disabled={loading}
                             />
                         </div>
 
                         {showDropdown && (
                             <div style={{
-                                position: 'absolute', top: '100%', left: 0, right: 0,
-                                maxHeight: '280px', overflowY: 'auto',
-                                background: '#151d2e', border: '1px solid rgba(255,255,255,0.08)',
-                                borderTop: 'none', borderRadius: '0 0 12px 12px',
-                                zIndex: 50, boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+                                position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0,
+                                maxHeight: '320px', overflowY: 'auto',
+                                background: 'rgba(5, 5, 5, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                                border: '1px solid var(--border-light)', borderRadius: '12px',
+                                zIndex: 50, boxShadow: 'var(--shadow-lg)',
                             }}>
                                 {filtered.length > 0 ? filtered.map((s) => (
                                     <div key={s.symbol} onClick={() => selectStock(s)}
                                         style={{
-                                            padding: '0.6rem 0.9rem', cursor: 'pointer',
+                                            padding: '1rem 1.25rem', cursor: 'pointer',
                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            borderBottom: '1px solid rgba(255,255,255,0.03)',
-                                            transition: 'background 0.15s',
+                                            borderBottom: '1px solid var(--border-light)',
+                                            transition: 'background 0.2s',
                                         }}
-                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(88,166,255,0.06)'}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                     >
                                         <div>
-                                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{s.symbol}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{s.name}</div>
+                                            <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)' }}>{s.symbol}</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{s.name}</div>
                                         </div>
-                                        <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>{s.market}</span>
+                                        <span className="badge badge-outline" style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}>{s.market}</span>
                                     </div>
                                 )) : (
-                                    <div style={{ padding: '1.25rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                                        No match — type a custom ticker
+                                    <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                        No match — press Enter to analyze custom ticker
                                     </div>
                                 )}
                             </div>
@@ -228,61 +203,58 @@ function StockAnalyzer() {
                     </div>
 
                     <button type="submit" className="btn btn-primary" disabled={loading || !ticker}
-                        style={{ height: '48px', padding: '0 1.75rem', whiteSpace: 'nowrap' }}>
-                        {loading ? 'Analyzing...' : <><BarChart3 size={16} /> Analyze</>}
+                        style={{ height: '56px', padding: '0 2.5rem', whiteSpace: 'nowrap', borderRadius: '12px', fontSize: '1.05rem' }}>
+                        {loading ? 'Initializing Agents...' : <><BarChart3 size={18} /> Run Analysis</>}
                     </button>
                 </form>
-
-                {ticker && !loading && (
-                    <div className="badge badge-accent" style={{ marginTop: '0.75rem' }}>
-                        <TrendingUp size={12} /> {ticker}
-                    </div>
-                )}
             </div>
 
             {/* Loading Progress */}
             {loading && (
-                <div className="glass-card-static" style={{ maxWidth: '780px', margin: '0 auto 2rem', animation: 'fadeIn 0.3s ease-out' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>
-                            Analyzing <span style={{ color: 'var(--accent-color)' }}>{ticker}</span>
-                        </h3>
-                        <span className="badge badge-warning" style={{ fontFamily: 'monospace' }}>
-                            <Clock size={12} /> {fmt(elapsed)}
+                <div className="glass-panel animate-fade-3" style={{ maxWidth: '800px', margin: '0 auto 3rem', padding: '2rem' }}>
+                    <div className="flex-between mb-4">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--warning)', boxShadow: '0 0 10px var(--warning)' }} />
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>
+                                AI Agents Analyzing <span className="grad-text-accent">{ticker}</span>
+                            </h3>
+                        </div>
+                        <span className="badge badge-warning" style={{ fontSize: '0.9rem', padding: '0.4rem 0.75rem' }}>
+                            <Clock size={14} /> {fmt(elapsed)}
                         </span>
                     </div>
 
-                    {/* Steps */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '1rem' }}>
                         {ANALYSIS_STEPS.map((step, i) => {
                             const Icon = step.icon;
                             const isActive = i === activeStep;
                             const isDone = i < activeStep;
                             return (
                                 <div key={i} style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.75rem',
-                                    padding: '0.7rem 0.9rem', borderRadius: 'var(--radius-sm)',
-                                    background: isActive ? 'var(--accent-glow)' : 'transparent',
-                                    border: isActive ? '1px solid rgba(88,166,255,0.15)' : '1px solid transparent',
-                                    transition: 'all 0.3s',
+                                    display: 'flex', alignItems: 'center', gap: '1rem',
+                                    padding: '1.25rem', borderRadius: '12px',
+                                    background: isActive ? 'var(--bg-input)' : 'transparent',
+                                    border: isActive ? '1px solid var(--border-focus)' : '1px solid var(--border-light)',
+                                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    opacity: isDone || isActive ? 1 : 0.5
                                 }}>
                                     <div style={{
-                                        width: '32px', height: '32px', borderRadius: '8px',
-                                        background: isDone ? 'rgba(63,185,80,0.15)' : isActive ? 'var(--accent-glow)' : 'rgba(255,255,255,0.04)',
+                                        width: '40px', height: '40px', borderRadius: '10px',
+                                        background: isDone ? 'var(--success-glow)' : isActive ? 'var(--accent-glow)' : 'rgba(255,255,255,0.03)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: isDone ? 'var(--success-color)' : isActive ? 'var(--accent-color)' : 'var(--text-secondary)',
+                                        color: isDone ? 'var(--success)' : isActive ? 'var(--accent-primary)' : 'var(--text-muted)',
                                     }}>
-                                        {isDone ? '✓' : <Icon size={16} />}
+                                        {isDone ? <ShieldCheck size={20} /> : <Icon size={20} />}
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '0.88rem', fontWeight: 600, color: isActive ? 'var(--accent-color)' : isDone ? 'var(--success-color)' : 'var(--text-secondary)' }}>
+                                        <div style={{ fontSize: '1.05rem', fontWeight: 600, color: isActive ? 'var(--text-primary)' : isDone ? 'var(--success)' : 'var(--text-secondary)' }}>
                                             {step.label}
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{step.desc}</div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{step.desc}</div>
                                     </div>
                                     {isActive && (
                                         <div style={{
-                                            width: '14px', height: '14px', border: '2px solid var(--accent-color)',
+                                            width: '20px', height: '20px', border: '3px solid var(--accent-primary)',
                                             borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite',
                                         }} />
                                     )}
@@ -295,12 +267,14 @@ function StockAnalyzer() {
 
             {/* Error */}
             {error && (
-                <div className="glass-card-static" style={{ maxWidth: '780px', margin: '0 auto 2rem', borderLeft: '3px solid var(--danger-color)' }}>
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                        <AlertTriangle size={20} color="var(--danger-color)" style={{ flexShrink: 0, marginTop: 2 }} />
+                <div className="glass-panel" style={{ maxWidth: '800px', margin: '0 auto 2rem', borderLeft: '4px solid var(--danger)' }}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <div style={{ padding: '0.5rem', background: 'var(--danger-glow)', borderRadius: '50%', color: 'var(--danger)' }}>
+                            <AlertTriangle size={24} />
+                        </div>
                         <div>
-                            <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Analysis Failed</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{error}</div>
+                            <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.2rem', color: 'var(--text-primary)' }}>Terminal Error</div>
+                            <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>{error}</div>
                         </div>
                     </div>
                 </div>
@@ -308,39 +282,46 @@ function StockAnalyzer() {
 
             {/* Result */}
             {result && !loading && (
-                <div style={{ maxWidth: '900px', margin: '0 auto', animation: 'fadeSlideUp 0.5s ease-out' }}>
+                <div className="animate-fade-4" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+
                     {/* Report Header */}
-                    <div className="glass-card-static" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div className="glass-panel mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', padding: '1.5rem 2.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                             <div style={{
-                                width: '44px', height: '44px', borderRadius: 'var(--radius-md)',
-                                background: 'linear-gradient(135deg, #58a6ff, #a371f7)',
+                                width: '56px', height: '56px', borderRadius: '16px',
+                                background: 'linear-gradient(135deg, var(--accent-secondary), var(--purple))',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                boxShadow: '0 8px 20px rgba(191, 46, 240, 0.3)'
                             }}>
-                                <BarChart3 size={22} color="#fff" />
+                                <FileText size={28} color="#fff" />
                             </div>
                             <div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>Investment Report</div>
-                                <div style={{ color: 'var(--accent-color)', fontWeight: 600, fontSize: '0.95rem' }}>{result.company}</div>
+                                <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0 }}>Comprehensive AI Report</h2>
+                                <div style={{ color: 'var(--text-secondary)', fontWeight: 500, fontSize: '1rem', marginTop: '0.2rem' }}>
+                                    Ticker: <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>{result.company}</span>
+                                </div>
                             </div>
                         </div>
-                        <span className="badge" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-                            <Clock size={12} /> {new Date(result.timestamp).toLocaleString()}
-                        </span>
+                        <div className="badge badge-outline" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.5rem 1rem' }}>
+                            <Clock size={14} color="var(--text-secondary)" />
+                            <span>{new Date(result.timestamp).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                        </div>
                     </div>
 
-                    {/* Structured Sections or Markdown Fallback */}
+                    {/* Report Content */}
                     {sections ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             {sections.map((sec, i) => (
-                                <div key={i} className="glass-card-static" style={{ animation: `fadeIn 0.3s ease-out ${i * 0.05}s both` }}>
+                                <div key={i} className="glass-panel" style={{ padding: '2.5rem', animation: `fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.1}s forwards`, opacity: 0 }}>
                                     <div style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.6rem',
-                                        marginBottom: '1rem', paddingBottom: '0.75rem',
-                                        borderBottom: '1px solid var(--border-color)',
+                                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                        marginBottom: '1.5rem', paddingBottom: '1rem',
+                                        borderBottom: '1px solid var(--border-light)',
                                     }}>
-                                        <ChevronRight size={16} color="var(--accent-color)" />
-                                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--accent-color)' }}>
+                                        <div style={{ padding: '0.4rem', background: 'var(--accent-glow)', borderRadius: '8px', color: 'var(--accent-primary)' }}>
+                                            <ChevronRight size={20} />
+                                        </div>
+                                        <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, fontFamily: 'var(--font-heading)' }}>
                                             {sec.title}
                                         </h3>
                                     </div>
@@ -350,46 +331,36 @@ function StockAnalyzer() {
                                 </div>
                             ))}
                         </div>
-                    ) : result.analysis && result.analysis.length > 100 ? (
-                        <div className="glass-card-static">
+                    ) : (
+                        <div className="glass-panel" style={{ padding: '3rem' }}>
                             <div className="report-markdown">
                                 <ReactMarkdown>{result.analysis}</ReactMarkdown>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="glass-card-static" style={{ textAlign: 'center', padding: '2.5rem' }}>
-                            <AlertTriangle size={28} color="var(--warning-color)" style={{ marginBottom: '0.75rem' }} />
-                            <h3 style={{ marginBottom: '0.5rem' }}>Partial Response</h3>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                                The AI agents returned a brief summary. Try running the analysis again.
-                            </p>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', textAlign: 'left', whiteSpace: 'pre-wrap', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                                {result.analysis || 'No content.'}
                             </div>
                         </div>
                     )}
                 </div>
             )}
 
-            {/* Report Markdown Styles */}
             <style>{`
-                .report-markdown { line-height: 1.75; color: rgba(240,246,252,0.88); font-size: 0.93rem; }
-                .report-markdown h1, .report-markdown h2 { font-size: 1.1rem; color: var(--accent-color); margin: 1rem 0 0.5rem; }
-                .report-markdown h3 { font-size: 1rem; color: var(--text-primary); margin: 0.75rem 0 0.4rem; }
-                .report-markdown p { margin-bottom: 0.6rem; }
-                .report-markdown strong { color: #e6edf3; }
-                .report-markdown ul, .report-markdown ol { padding-left: 1.25rem; margin-bottom: 0.75rem; }
-                .report-markdown li { margin-bottom: 0.25rem; }
-                .report-markdown li::marker { color: var(--accent-color); }
-                .report-markdown table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.88rem; }
-                .report-markdown th { background: rgba(88,166,255,0.06); color: var(--accent-color); font-weight: 600; text-align: left; padding: 0.55rem 0.75rem; border: 1px solid rgba(255,255,255,0.06); }
-                .report-markdown td { padding: 0.5rem 0.75rem; border: 1px solid rgba(255,255,255,0.04); }
-                .report-markdown tr:nth-child(even) { background: rgba(255,255,255,0.015); }
-                .report-markdown blockquote { border-left: 3px solid var(--purple-color); padding: 0.5rem 0.75rem; margin: 0.75rem 0; background: rgba(163,113,247,0.04); border-radius: 0 6px 6px 0; color: var(--text-secondary); }
-                .report-markdown code { background: rgba(255,255,255,0.07); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.85em; color: #f0883e; }
-                .report-markdown pre { background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px; overflow-x: auto; margin: 0.75rem 0; }
-                .report-markdown pre code { background: none; padding: 0; color: #e6edf3; }
-                .report-markdown hr { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+                .report-markdown { line-height: 1.8; color: var(--text-secondary); font-size: 1.05rem; }
+                .report-markdown h1, .report-markdown h2 { font-size: 1.4rem; color: var(--text-primary); margin: 2rem 0 1rem; font-family: var(--font-heading); font-weight: 700; }
+                .report-markdown h1:first-child, .report-markdown h2:first-child { margin-top: 0; }
+                .report-markdown h3 { font-size: 1.2rem; color: var(--text-primary); margin: 1.5rem 0 0.8rem; font-weight: 600; }
+                .report-markdown p { margin-bottom: 1.25rem; }
+                .report-markdown strong { color: var(--accent-primary); font-weight: 600; }
+                .report-markdown ul, .report-markdown ol { padding-left: 1.5rem; margin-bottom: 1.5rem; }
+                .report-markdown li { margin-bottom: 0.6rem; }
+                .report-markdown li::marker { color: var(--accent-secondary); font-weight: bold; }
+                .report-markdown table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                .report-markdown th { background: rgba(0, 242, 254, 0.08); color: var(--accent-primary); font-weight: 700; text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-light); font-family: var(--font-heading); }
+                .report-markdown td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(0,0,0,0.2); }
+                .report-markdown tr:last-child td { border-bottom: none; }
+                .report-markdown tr:hover td { background: rgba(255,255,255,0.02); }
+                .report-markdown blockquote { border-left: 4px solid var(--purple); padding: 1rem 1.5rem; margin: 1.5rem 0; background: var(--purple-glow); border-radius: 0 8px 8px 0; color: var(--text-primary); font-style: italic; }
+                .report-markdown code { background: rgba(255,255,255,0.05); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9em; color: var(--warning); border: 1px solid var(--border-light); }
+                .report-markdown pre { background: var(--bg-dark); padding: 1.5rem; border-radius: 12px; overflow-x: auto; margin: 1.5rem 0; border: 1px solid var(--border-light); }
+                .report-markdown pre code { background: none; padding: 0; color: #a0aab2; border: none; font-size: 0.95rem; }
+                .report-markdown hr { border: none; border-top: 1px solid var(--border-light); margin: 2.5rem 0; }
             `}</style>
         </div>
     );

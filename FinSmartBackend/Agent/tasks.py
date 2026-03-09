@@ -58,47 +58,25 @@ class StockAnalysisTasks():
     return Task(description=dedent(f"""
         Conduct a COMPREHENSIVE QUANTITATIVE analysis of the stock's financial health.
         
-        YOU MUST INCLUDE THE FOLLOWING NUMERICAL METRICS:
-        
-        1. **Valuation Ratios** (all with exact numbers):
-           - P/E Ratio (current, 5-year average, industry average)
+        1. **Valuation Ratios** (Focus only on the target company, provide exact numbers):
+           - P/E Ratio
            - P/S Ratio (Price-to-Sales)
            - P/B Ratio (Price-to-Book)
-           - P/FCF Ratio (Price-to-Free Cash Flow)
-           - EV/EBITDA, EV/FCF
+           - EV/EBITDA
         
-        2. **Profitability Metrics** (with trends):
-           - Gross Margin % (last 4 quarters)
-           - Operating Margin % (last 4 quarters)
-           - Net Profit Margin % (last 4 quarters)
+        2. **Profitability Metrics**:
+           - Gross Margin %
+           - Operating Margin %
+           - Net Profit Margin %
            - ROE (Return on Equity) %
-           - ROA (Return on Assets) %
-           - ROIC (Return on Invested Capital) %
         
-        3. **Growth Metrics** (YoY and QoQ):
-           - Revenue Growth % (last 4 quarters YoY)
-           - Earnings Growth % (last 4 quarters YoY)
-           - EPS Growth %
-           - Free Cash Flow Growth %
-        
-        4. **Financial Health Ratios**:
+        3. **Growth & Health Metrics**:
+           - Revenue Growth % (YoY)
+           - Earnings Growth % (YoY)
            - Current Ratio
-           - Quick Ratio
            - Debt-to-Equity Ratio
-           - Debt-to-FCF Ratio
-           - Interest Coverage Ratio
         
-        5. **Per Share Metrics**:
-           - EPS (current, last 4 quarters)
-           - Book Value per Share
-           - Free Cash Flow per Share
-           - Revenue per Share
-        
-        6. **Comparative Analysis**:
-           - Compare ALL above metrics with 3-5 industry peers
-           - Show whether stock is trading at premium/discount
-        
-        Present ALL data in tables and charts format.
+        Provide the data in simple, clean markdown tables for the target company ONLY. Do not attempt to pull data for industry peers if it will result in empty tables. Make sure every cell in your tables contains actual data or 'N/A'.
         {self.__tip_section()}
 
         Use the most recent quarterly and annual data.
@@ -155,32 +133,28 @@ class StockAnalysisTasks():
         - Risk Rating (Low/Medium/High)
         
         ## 2. Valuation Summary Table
-        | Metric | Current | 1Y Avg | Industry Avg | Assessment |
-        |--------|---------|--------|--------------|------------|
-        | P/E Ratio | X | X | X | Overvalued/Fair/Undervalued |
-        | P/S Ratio | X | X | X | ... |
-        | P/B Ratio | X | X | X | ... |
-        | EV/FCF | X | X | X | ... |
+        | Metric | Current Value | Assessment |
+        |--------|---------------|------------|
+        | P/E Ratio | X | Overvalued/Fair/Undervalued |
+        | P/S Ratio | X | ... |
+        | P/B Ratio | X | ... |
+        | EV/EBITDA | X | ... |
         
         ## 3. Financial Performance Metrics
-        - Revenue: Last 4 quarters with YoY growth %
-        - Net Income: Last 4 quarters with YoY growth %
-        - EPS: Last 4 quarters with YoY growth %
-        - Margins: Gross, Operating, Net (all with trends)
+        - Revenue Growth: X%
+        - Earnings Growth: X%
+        - Gross Margin: X%
+        - Net Margin: X%
         
         ## 4. Profitability & Returns
         - ROE: X%
-        - ROA: X%
-        - ROIC: X%
-        - Include industry comparison
+        - Operating Margin: X%
         
         ## 5. Financial Health Scorecard
         | Metric | Value | Status |
         |--------|-------|--------|
         | Current Ratio | X | Healthy/Warning |
-        | Quick Ratio | X | ... |
         | Debt/Equity | X | ... |
-        | Interest Coverage | X | ... |
         
         ## 6. Growth Analysis
         - Revenue CAGR (3Y, 5Y)

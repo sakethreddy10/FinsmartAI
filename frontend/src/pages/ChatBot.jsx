@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
-import { Send, User, Bot, AlertCircle, Paperclip, X, FileText, CheckCircle } from 'lucide-react';
+import { Send, User, Bot, AlertCircle, Paperclip, X, FileText, CheckCircle, Sparkles, MessageSquare } from 'lucide-react';
 
 const QUICK_ACTIONS_GENERAL = [
   '💡 What is SIP and how does it work?',
   '📊 Explain mutual funds vs stocks',
   '🏦 How to start investing in India?',
-  '💰 I earn 80000, spent 15000 rent, 5000 food, 3000 electricity',
+  '💰 I earn 80000, spent 15000 rent, 5000 food',
 ];
 
 const QUICK_ACTIONS_DOC = [
@@ -17,7 +17,7 @@ const QUICK_ACTIONS_DOC = [
   '🔍 What are the main recommendations?',
 ];
 
-const USER_ID = crypto.randomUUID(); // Stable per browser session (per page load)
+const USER_ID = crypto.randomUUID();
 
 export default function ChatBot() {
   const [messages, setMessages] = useState([
@@ -42,7 +42,6 @@ export default function ChatBot() {
   }, [messages]);
 
   // ───────────────────────── File upload logic ─────────────────────────
-
   const processFile = async (file) => {
     if (!file) return;
 
@@ -83,7 +82,7 @@ export default function ChatBot() {
   const handleFileInput = (e) => {
     const file = e.target.files?.[0];
     if (file) processFile(file);
-    e.target.value = ''; // reset so same file can be re-uploaded
+    e.target.value = '';
   };
 
   const handleDrop = useCallback((e) => {
@@ -107,7 +106,6 @@ export default function ChatBot() {
   };
 
   // ───────────────────────── Messaging logic ─────────────────────────
-
   const pushSystemMessage = (role, text) => {
     setMessages((prev) => [...prev, { role, text }]);
   };
@@ -122,7 +120,6 @@ export default function ChatBot() {
       let bot = '';
 
       if (sessionId) {
-        // ── RAG Document Q&A mode ──
         const res = await axios.post('http://localhost:8000/api/rag/query', {
           question: userMessage.trim(),
           user_id: USER_ID,
@@ -134,7 +131,6 @@ export default function ChatBot() {
           bot += `\n\n---\n📎 *Sources:* ${data.sources.join(' · ')}`;
         }
       } else {
-        // ── General Finance mode ──
         const res = await axios.post('http://localhost:8000/api/finance_rag/query', {
           query: userMessage.trim(),
         });
@@ -167,115 +163,123 @@ export default function ChatBot() {
   };
 
   // ───────────────────────── Helpers ─────────────────────────
-
   const quickActions = sessionId ? QUICK_ACTIONS_DOC : QUICK_ACTIONS_GENERAL;
 
   const getBubbleStyle = (role) => {
-    if (role === 'user') return { background: 'linear-gradient(135deg, #58a6ff, #3b82f6)', color: '#fff', border: 'none' };
-    if (role === 'error') return { background: 'rgba(248,81,73,0.06)', color: 'var(--danger-color)', border: '1px solid rgba(248,81,73,0.1)' };
-    if (role === 'success') return { background: 'rgba(46,160,67,0.08)', color: 'var(--success-color)', border: '1px solid rgba(46,160,67,0.15)' };
-    if (role === 'system') return { background: 'rgba(88,166,255,0.06)', color: 'var(--text-secondary)', border: '1px solid rgba(88,166,255,0.1)', fontStyle: 'italic' };
-    return { background: 'rgba(255,255,255,0.04)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' };
+    if (role === 'user') return { background: 'linear-gradient(135deg, var(--accent-secondary), var(--accent-primary))', color: '#050505', border: 'none', boxShadow: '0 4px 15px rgba(0, 242, 254, 0.2)' };
+    if (role === 'error') return { background: 'var(--danger-glow)', color: 'var(--danger)', border: '1px solid rgba(255,0,85,0.2)' };
+    if (role === 'success') return { background: 'var(--success-glow)', color: 'var(--success)', border: '1px solid rgba(0,255,135,0.2)' };
+    if (role === 'system') return { background: 'rgba(255,255,255,0.03)', color: 'var(--text-muted)', border: '1px solid var(--border-light)', fontStyle: 'italic' };
+    return { background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', boxShadow: '0 2px 10px rgba(0,0,0,0.2)' };
   };
 
   const isUserMsg = (role) => role === 'user';
 
   return (
-    <div className="container" style={{ height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
+    <div className="container page-wrapper" style={{ height: 'calc(100vh - 20px)', display: 'flex', flexDirection: 'column', paddingTop: '6rem', paddingBottom: '2rem' }}>
 
       {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-        <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-sm)', background: 'rgba(63,185,80,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Bot size={20} color="var(--success-color)" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, lineHeight: 1.2 }}>AI Financial Assistant</h1>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-            {sessionId ? `📄 Document mode — ${uploadedFileName}` : 'Powered by Nvidia Llama 3 + RAG'}
-          </span>
+      <div className="flex-between mb-3 animate-fade-1" style={{ flexWrap: 'wrap', gap: '1rem', padding: '0 0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: 44, height: 44, borderRadius: '12px', background: 'var(--success-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <MessageSquare size={22} color="var(--success)" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, fontFamily: 'var(--font-heading)', letterSpacing: '-0.02em' }}>Intelligence Chat</h1>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              {sessionId ? `📄 Document RAG Active` : 'Powered by NVIDIA NIM & Llama 3'}
+            </span>
+          </div>
         </div>
 
         {/* Mode badge */}
-        <div style={{
-          padding: '0.3rem 0.8rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600,
-          background: sessionId ? 'rgba(46,160,67,0.12)' : 'rgba(88,166,255,0.12)',
-          color: sessionId ? 'var(--success-color)' : 'var(--accent-color)',
-          border: `1px solid ${sessionId ? 'rgba(46,160,67,0.2)' : 'rgba(88,166,255,0.2)'}`,
-        }}>
-          {sessionId ? '📄 Document Q&A' : '💬 General Finance'}
-        </div>
+        {sessionId && (
+          <div className="badge" style={{
+            padding: '0.4rem 1rem',
+            background: 'var(--success-glow)',
+            color: 'var(--success)',
+            border: '1px solid rgba(0,255,135,0.3)',
+          }}>
+            <span><FileText size={14} style={{ marginRight: 4, display: 'inline' }} /> Document Context</span>
+          </div>
+        )}
       </div>
 
       {/* ── Document Upload Bar ── */}
-      {!sessionId ? (
-        <div
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => !uploading && fileInputRef.current?.click()}
-          style={{
-            marginBottom: '0.75rem',
-            padding: '0.75rem 1.25rem',
-            border: `2px dashed ${isDragging ? 'var(--accent-color)' : 'var(--border-color)'}`,
-            borderRadius: '10px',
-            background: isDragging ? 'rgba(88,166,255,0.06)' : 'rgba(255,255,255,0.02)',
-            cursor: uploading ? 'wait' : 'pointer',
-            display: 'flex', alignItems: 'center', gap: '0.6rem',
-            transition: 'all 0.2s',
-            color: 'var(--text-secondary)',
-            fontSize: '0.85rem',
-          }}
-        >
-          <Paperclip size={16} style={{ flexShrink: 0 }} />
-          <span>
-            {uploading
-              ? 'Uploading & indexing document…'
-              : isDragging
-                ? 'Drop file here'
-                : 'Upload a document to ask questions about it (PDF, TXT, CSV) — click or drag & drop'}
-          </span>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.txt,.csv"
-            style={{ display: 'none' }}
-            onChange={handleFileInput}
-            disabled={uploading}
-          />
-        </div>
-      ) : (
-        /* Active document pill */
-        <div style={{
-          marginBottom: '0.75rem', padding: '0.5rem 1rem',
-          background: 'rgba(46,160,67,0.08)', border: '1px solid rgba(46,160,67,0.2)',
-          borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.6rem',
-        }}>
-          <FileText size={15} color="var(--success-color)" style={{ flexShrink: 0 }} />
-          <span style={{ flex: 1, fontSize: '0.85rem', color: 'var(--success-color)', fontWeight: 500 }}>
-            {uploadedFileName}
-          </span>
-          <CheckCircle size={14} color="var(--success-color)" />
-          <button
-            onClick={clearDocument}
-            title="Remove document & switch to General mode"
+      <div className="animate-fade-2">
+        {!sessionId ? (
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => !uploading && fileInputRef.current?.click()}
             style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-secondary)', padding: '2px', display: 'flex',
-              borderRadius: '4px', transition: 'color 0.15s',
+              marginBottom: '1rem',
+              padding: '1.25rem 2rem',
+              border: `2px dashed ${isDragging ? 'var(--accent-primary)' : 'var(--border-light)'}`,
+              borderRadius: '16px',
+              background: isDragging ? 'var(--accent-glow)' : 'rgba(255,255,255,0.02)',
+              cursor: uploading ? 'wait' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: '1rem',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              color: 'var(--text-secondary)',
+              fontSize: '0.95rem',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger-color)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
           >
-            <X size={15} />
-          </button>
-        </div>
-      )}
+            <div style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', color: 'var(--text-primary)' }}>
+              <Paperclip size={20} />
+            </div>
+            <span style={{ flex: 1 }}>
+              {uploading
+                ? <strong style={{ color: 'var(--accent-primary)' }}>Uploading & indexing document into Vector Store…</strong>
+                : isDragging
+                  ? <strong style={{ color: 'var(--accent-primary)' }}>Drop file here to index</strong>
+                  : <span><strong>Upload a Document</strong> to query its contents (PDF, TXT, CSV) — click or drag & drop</span>}
+            </span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.txt,.csv"
+              style={{ display: 'none' }}
+              onChange={handleFileInput}
+              disabled={uploading}
+            />
+          </div>
+        ) : (
+          <div style={{
+            marginBottom: '1rem', padding: '1rem 1.5rem',
+            background: 'var(--success-glow)', border: '1px solid rgba(0,255,135,0.2)',
+            borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem',
+          }}>
+            <FileText size={18} color="var(--success)" style={{ flexShrink: 0 }} />
+            <span style={{ flex: 1, fontSize: '0.95rem', color: 'var(--success)', fontWeight: 600 }}>
+              {uploadedFileName}
+            </span>
+            <CheckCircle size={18} color="var(--success)" />
+            <button
+              onClick={clearDocument}
+              title="Remove document & switch to General mode"
+              style={{
+                background: 'rgba(0,0,0,0.2)', border: 'none', cursor: 'pointer',
+                color: 'var(--text-secondary)', padding: '0.35rem', display: 'flex',
+                borderRadius: '6px', transition: 'all 0.2s', marginLeft: '0.5rem'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'var(--danger)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'rgba(0,0,0,0.2)'; }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* ── Chat Area ── */}
-      <div className="glass-card-static" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+      <div className="glass-panel animate-fade-3" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, border: '1px solid var(--border-light)' }}>
 
         {/* Messages */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {messages.map((msg, i) => {
             const isUser = isUserMsg(msg.role);
             const isErr = msg.role === 'error';
@@ -284,27 +288,27 @@ export default function ChatBot() {
               <div
                 key={i}
                 style={{
-                  display: 'flex', gap: '0.6rem',
+                  display: 'flex', gap: '1rem',
                   alignSelf: isUser ? 'flex-end' : 'flex-start',
                   maxWidth: '85%',
-                  animation: 'fadeIn 0.25s ease-out',
+                  animation: 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
               >
                 {!isUser && (
                   <div style={{
-                    width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                    background: isErr ? 'rgba(248,81,73,0.12)' : 'rgba(63,185,80,0.1)',
+                    width: 36, height: 36, borderRadius: '10px', flexShrink: 0,
+                    background: isErr ? 'var(--danger-glow)' : 'var(--success-glow)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: isErr ? 'var(--danger-color)' : 'var(--success-color)',
+                    color: isErr ? 'var(--danger)' : 'var(--success)',
                   }}>
-                    {isErr ? <AlertCircle size={16} /> : <Bot size={16} />}
+                    {isErr ? <AlertCircle size={18} /> : <Bot size={18} />}
                   </div>
                 )}
 
                 <div style={{
-                  padding: '0.75rem 1rem',
-                  borderRadius: isUser ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                  fontSize: '0.9rem', lineHeight: 1.65,
+                  padding: '1.1rem 1.4rem',
+                  borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                  fontSize: '1rem', lineHeight: 1.6,
                   ...getBubbleStyle(msg.role),
                 }}>
                   {isUser ? msg.text : (
@@ -316,12 +320,12 @@ export default function ChatBot() {
 
                 {isUser && (
                   <div style={{
-                    width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                    background: 'rgba(255,255,255,0.08)',
+                    width: 36, height: 36, borderRadius: '10px', flexShrink: 0,
+                    background: 'rgba(255,255,255,0.1)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--text-secondary)',
+                    color: 'var(--text-primary)',
                   }}>
-                    <User size={16} />
+                    <User size={18} />
                   </div>
                 )}
               </div>
@@ -330,14 +334,14 @@ export default function ChatBot() {
 
           {/* Typing indicator */}
           {loading && (
-            <div style={{ display: 'flex', gap: '0.6rem', alignSelf: 'flex-start' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(63,185,80,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success-color)' }}>
-                <Bot size={16} />
+            <div style={{ display: 'flex', gap: '1rem', alignSelf: 'flex-start' }}>
+              <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--success-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)' }}>
+                <Bot size={18} />
               </div>
-              <div style={{ padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', borderRadius: '12px 12px 12px 2px', display: 'flex', gap: '4px', alignItems: 'center' }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'pulse 1s ease-in-out infinite' }} />
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'pulse 1s ease-in-out 0.2s infinite' }} />
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'pulse 1s ease-in-out 0.4s infinite' }} />
+              <div style={{ padding: '1rem 1.4rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-light)', borderRadius: '12px 12px 12px 2px', display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'pulse 1s ease-in-out infinite' }} />
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'pulse 1s ease-in-out 0.2s infinite' }} />
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--text-secondary)', animation: 'pulse 1s ease-in-out 0.4s infinite' }} />
               </div>
             </div>
           )}
@@ -347,17 +351,16 @@ export default function ChatBot() {
 
         {/* Quick Actions */}
         {messages.length <= 1 && !loading && (
-          <div style={{ padding: '0 1.25rem 0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+          <div style={{ padding: '0 2rem 1rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             {quickActions.map((q, i) => (
               <button
                 key={i}
                 onClick={() => sendMessage(q.replace(/^[^\s]+\s/, ''))}
-                className="btn-ghost"
+                className="btn-secondary"
                 style={{
-                  fontSize: '0.78rem', padding: '0.4rem 0.75rem',
-                  border: '1px solid var(--border-color)', borderRadius: '999px',
-                  color: 'var(--text-secondary)', cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.02)', transition: 'all 0.15s',
+                  fontSize: '0.85rem', padding: '0.6rem 1rem',
+                  borderRadius: '100px', cursor: 'pointer',
+                  transition: 'all 0.2s', fontWeight: 500
                 }}
               >
                 {q}
@@ -367,62 +370,45 @@ export default function ChatBot() {
         )}
 
         {/* Input Bar */}
-        <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.15)' }}>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-            {/* Inline upload button (clip icon) when in general mode */}
-            {!sessionId && (
-              <button
-                type="button"
-                title="Upload document"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                style={{
-                  height: '44px', width: '44px', flexShrink: 0,
-                  background: 'rgba(88,166,255,0.08)',
-                  border: '1px solid rgba(88,166,255,0.2)',
-                  borderRadius: '8px', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--accent-color)', transition: 'all 0.15s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(88,166,255,0.15)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(88,166,255,0.08)')}
-              >
-                <Paperclip size={16} />
-              </button>
-            )}
-            <input
-              type="text"
-              className="input-control"
-              placeholder={sessionId ? `Ask about ${uploadedFileName}…` : 'Ask anything about finance…'}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={loading}
-              style={{ flex: 1, height: '44px' }}
-            />
+        <div style={{ padding: '1.25rem 2rem', borderTop: '1px solid var(--border-light)', background: 'var(--bg-dark)' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <input
+                type="text"
+                className="input-control"
+                placeholder={sessionId ? `Ask about ${uploadedFileName}…` : 'Ask anything about finance…'}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={loading}
+                autoFocus
+                style={{ width: '100%', height: '56px', borderRadius: '100px', paddingLeft: '1.5rem', paddingRight: '1.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '1.05rem' }}
+              />
+            </div>
             <button
               type="submit"
               className="btn btn-primary"
               disabled={loading || !input.trim()}
-              style={{ height: '44px', padding: '0 1.25rem' }}
+              style={{ height: '56px', width: '56px', padding: 0, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Send size={16} />
+              <Send size={22} style={{ marginLeft: '-3px', color: '#050505' }} />
             </button>
           </form>
         </div>
       </div>
 
       <style>{`
-        .chat-markdown p { margin: 0 0 0.4rem; }
+        .chat-markdown p { margin: 0 0 0.6rem; }
         .chat-markdown p:last-child { margin: 0; }
-        .chat-markdown strong { color: #e6edf3; }
-        .chat-markdown h3 { font-size: 0.95rem; margin: 0.5rem 0 0.3rem; color: var(--accent-color); }
-        .chat-markdown ul, .chat-markdown ol { padding-left: 1.25rem; margin: 0.3rem 0; }
-        .chat-markdown li { margin-bottom: 0.15rem; }
-        .chat-markdown table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.85rem; }
-        .chat-markdown th { text-align: left; padding: 0.4rem 0.6rem; background: rgba(88,166,255,0.06); color: var(--accent-color); border: 1px solid rgba(255,255,255,0.06); }
-        .chat-markdown td { padding: 0.35rem 0.6rem; border: 1px solid rgba(255,255,255,0.04); }
-        .chat-markdown code { background: rgba(255,255,255,0.07); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.85em; }
-        .chat-markdown hr { border: none; border-top: 1px solid var(--border-color); margin: 0.75rem 0; }
+        .chat-markdown strong { color: var(--accent-primary); font-weight: 600; }
+        .chat-markdown h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem; color: var(--text-primary); font-family: var(--font-heading); font-weight: 700; }
+        .chat-markdown ul, .chat-markdown ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+        .chat-markdown li { margin-bottom: 0.25rem; }
+        .chat-markdown table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.95rem; background: rgba(0,0,0,0.2); border-radius: 8px; overflow: hidden; }
+        .chat-markdown th { text-align: left; padding: 0.6rem 0.8rem; background: rgba(0,242,254,0.08); color: var(--accent-primary); border-bottom: 1px solid var(--border-light); font-weight: 600; }
+        .chat-markdown td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .chat-markdown tr:last-child td { border-bottom: none; }
+        .chat-markdown code { background: rgba(255,255,255,0.05); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; color: var(--warning); border: 1px solid var(--border-light); }
+        .chat-markdown hr { border: none; border-top: 1px solid var(--border-light); margin: 1.25rem 0; }
         .chat-markdown em { color: var(--text-secondary); }
       `}</style>
     </div>
