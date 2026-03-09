@@ -35,6 +35,8 @@ class StockAnalysisTasks():
         the stock.
         Also make sure to return the stock ticker.
         
+        IMPORTANT: DO NOT include a main title like "## Market Research" at the beginning of your text. Just provide the substantive content.
+        
         {self.__tip_section()}
   
         Make sure to use the most recent data as possible.
@@ -76,7 +78,13 @@ class StockAnalysisTasks():
            - Current Ratio
            - Debt-to-Equity Ratio
         
-        Provide the data in simple, clean markdown tables for the target company ONLY. Do not attempt to pull data for industry peers if it will result in empty tables. Make sure every cell in your tables contains actual data or 'N/A'.
+        Provide the data in simple, clean markdown tables for the target company ONLY. Make sure every cell in your tables contains actual data or 'N/A'.
+        
+        IMPORTANT RULES:
+        1. DO NOT include a main title like "## Financial Analysis" at the beginning of your text. Just provide the substantive content.
+        2. If the company is PRIVATE, UNLISTED, or financial data is completely unavailable (like GROWW), DO NOT create tables filled with "N/A". Instead, write a short paragraph explaining that quantitative financial data is unavailable because it is a private entity.
+        3. Only generate the tables if you have actual numerical data.
+
         {self.__tip_section()}
 
         Use the most recent quarterly and annual data.
@@ -106,10 +114,14 @@ class StockAnalysisTasks():
         Extract relevant data and insights that could influence
         the stock's future performance.
 
-        Your final answer must be an expanded report that now
-        also highlights significant findings from these filings,
-        including any red flags or positive indicators for
-        your customer.
+        Your final answer must be an expanded report highlighting significant findings from these filings,
+        including any red flags or positive indicators for the customer.
+        
+        IMPORTANT RULES:
+        1. DO NOT include a main title like "## SEC Filings & Earnings Analysis" at the beginning.
+        2. DO NOT use bold text like "**SEC Filings & Earnings Analysis**" for the main section title. Just write the findings normally.
+        3. If no SEC filings exist (e.g. if the company is private, foreign, or recently listed), simply state that no public filings are available for this entity. DO NOT invent findings.
+
         {self.__tip_section()}        
       """),
       expected_output="An expanded report highlighting significant findings from SEC filings, including red flags and positive indicators.",
@@ -173,11 +185,17 @@ class StockAnalysisTasks():
         ## 9. Risk Factors (with impact level)
         - List 3-5 key risks with High/Medium/Low impact
         
-        ## 10. Investment Thesis (3-5 bullet points)
+        ## 10. Investment Thesis
         - Clear reasons to BUY/HOLD/SELL with supporting data
         
-        Format EVERYTHING in clean markdown tables and use actual numbers.
-        NO VAGUE STATEMENTS - only data-backed analysis.
+        Format EVERYTHING cleanly.
+        
+        IMPORTANT RULES:
+        1. DO NOT include a main title like "## Investment Recommendation" at the beginning. Just jump straight into "## 1. Executive Summary".
+        2. If the company is PRIVATE, UNLISTED, or financial data is completely unavailable (like GROWW): DO NOT render any of the empty tables above with "N/A". Instead, write a qualitative business overview, available private estimates, and a qualitative recommendation.
+        3. ALWAYS use actual numbers if available.
+        4. In the Investment Thesis section, simply provide the bullet points. DO NOT output the literal text "(3-5 bullet points)".
+
         {self.__tip_section()}
       """),
       expected_output="A professional investment report with comprehensive tables, metrics, ratios, and data-driven recommendations in MARKDOWN format.",
