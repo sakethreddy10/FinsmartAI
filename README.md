@@ -198,15 +198,6 @@ npm run dev
 
 ---
 
-## 🤝 Contributors
-
-| Contributor | Module |
-|---|---|
-| **Shiva** (`shiva_repo/`) | Original Streamlit prototype, budget & investment modules |
-| **Thiru** (`thiru_repo/`) | Finance Bot, RAG system, personal finance assistant |
-
----
-
 ## 📄 License
 
 MIT
