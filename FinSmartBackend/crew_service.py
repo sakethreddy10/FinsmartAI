@@ -34,35 +34,24 @@ def fix_markdown_formatting(text: str) -> str:
     #    Ensure each | ... | row starts on a new line
     text = re.sub(r'\s*\|\s*\|', ' |\n|', text)
 
-    # 3. Ensure separator rows (|---|---| or |:---|) are on their own lines  
+    # 3. Ensure a blank line before a table starts if it's appended to a paragraph
+    #    E.g. "some text. | Metric |" -> "some text.\n\n| Metric |"
+    text = re.sub(r'([a-zA-Z0-9\.\?!])\s+(\|\s*[a-zA-Z])', r'\1\n\n\2', text)
+
+    # 4. Ensure separator rows (|---|---| or |:---|) are on their own lines  
     text = re.sub(r'([^\n])\s*(\|[-:\s]+\|)', r'\1\n\2', text)
 
-    # 4. Ensure markdown headers start on new lines
+    # 5. Ensure markdown headers start on new lines
     text = re.sub(r'([^\n])(\s*#{1,4}\s)', r'\1\n\n\2', text)
 
-    # 5. Fix "**Bold Text**" sections that should be headers
+    # 6. Fix "**Bold Text**" sections that should be headers
     text = re.sub(r'([^\n])\s*\*\*([A-Z][A-Za-z\s&]+)\*\*\s*', r'\1\n\n## \2\n', text)
 
-    # 6. Ensure bullet points start on new lines
+    # 7. Ensure bullet points start on new lines
     text = re.sub(r'([^\n])\s*(- [A-Z])', r'\1\n\2', text)
 
-    # 7. Clean up excessive whitespace/newlines
+    # 8. Clean up excessive whitespace/newlines
     text = re.sub(r'\n{4,}', '\n\n\n', text)
-
-    # 8. Fix table: ensure header row, separator, and data rows each on own line
-    lines = text.split('\n')
-    fixed_lines = []
-    for line in lines:
-        stripped = line.strip()
-        # If a line has multiple | ... | patterns (like a concatenated table)
-        if stripped.count('|') > 6 and not stripped.startswith('|'):
-            # Try to split into table rows
-            parts = re.split(r'(?<=\|)\s+(?=\|)', stripped)
-            for part in parts:
-                fixed_lines.append(part)
-        else:
-            fixed_lines.append(line)
-    text = '\n'.join(fixed_lines)
 
     return text.strip()
 

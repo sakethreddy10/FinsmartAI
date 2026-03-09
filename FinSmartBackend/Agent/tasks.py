@@ -82,8 +82,8 @@ class StockAnalysisTasks():
         
         IMPORTANT RULES:
         1. DO NOT include a main title like "## Financial Analysis" at the beginning of your text. Just provide the substantive content.
-        2. If the company is PRIVATE, UNLISTED, or financial data is completely unavailable (like GROWW), DO NOT create tables filled with "N/A". Instead, write a short paragraph explaining that quantitative financial data is unavailable because it is a private entity.
-        3. Only generate the tables if you have actual numerical data.
+        2. DO NOT prematurely assume a company is completely private without data. Search extensively for any publicly reported revenues, margins, or valuations (e.g., funding rounds, press releases). If traditional stock metics are unavailable, provide the metrics you CAN find in a clean format rather than a wall of "N/A"s.
+        3. ALWAYS format markdown tables with proper newlines. Every row of the table MUST be on a new line. Do NOT output table rows on a single continuous line.
 
         {self.__tip_section()}
 
@@ -106,8 +106,8 @@ class StockAnalysisTasks():
 
   def filings_analysis(self, agent):
     return Task(description=dedent(f"""
-        Analyze the latest 10-Q and 10-K filings from EDGAR for
-        the stock in question. 
+        Analyze the latest company filings, annual reports, quarterly earnings reports, 
+        and official disclosures for the stock in question. 
         Focus on key sections like Management's Discussion and
         Analysis, financial statements, insider trading activity, 
         and any disclosed risks.
@@ -120,7 +120,7 @@ class StockAnalysisTasks():
         IMPORTANT RULES:
         1. DO NOT include a main title like "## SEC Filings & Earnings Analysis" at the beginning.
         2. DO NOT use bold text like "**SEC Filings & Earnings Analysis**" for the main section title. Just write the findings normally.
-        3. If no SEC filings exist (e.g. if the company is private, foreign, or recently listed), simply state that no public filings are available for this entity. DO NOT invent findings.
+        3. If the company is foreign (e.g. Indian companies on NSE/BSE) they DO NOT file with the US SEC. Do NOT state that filings are unavailable just because they aren't on EDGAR. Search for their local equivalent filings or earnings press releases instead! Only state filings are unavailable if the company is completely private with zero public financial disclosures.
 
         {self.__tip_section()}        
       """),
@@ -192,9 +192,10 @@ class StockAnalysisTasks():
         
         IMPORTANT RULES:
         1. DO NOT include a main title like "## Investment Recommendation" at the beginning. Just jump straight into "## 1. Executive Summary".
-        2. If the company is PRIVATE, UNLISTED, or financial data is completely unavailable (like GROWW): DO NOT render any of the empty tables above with "N/A". Instead, write a qualitative business overview, available private estimates, and a qualitative recommendation.
-        3. ALWAYS use actual numbers if available.
-        4. In the Investment Thesis section, simply provide the bullet points. DO NOT output the literal text "(3-5 bullet points)".
+        2. DO NOT assume a company has no data just because it's private. Search extensively. If traditional metrics are unavailable, provide a qualitative business overview, private valuation estimates, and a qualitative recommendation rather than breaking the tables.
+        3. ALWAYS format markdown tables correctly with PROPER NEWLINES. Each row of a table MUST be on a new line. Do NOT combine table rows into a single continuous line.
+        4. ALWAYS use actual numbers if available.
+        5. In the Investment Thesis section, simply provide the bullet points. DO NOT output the literal text "(3-5 bullet points)".
 
         {self.__tip_section()}
       """),
