@@ -49,12 +49,14 @@ A conversational financial assistant that answers complex finance questions usin
 Simplifies monthly accounting through Natural Language Processing (NLP).
 - Users describe income and expenses in natural language; the LLM automatically categorizes expenses (Groceries, Rent, Utilities, etc.) and computes net savings.
 - Interactive React pie chart detailing cash-flow breakdown.
+- Features a premium, ultra-wide horizontal input interface for rapid data entry.
 - **Route:** `/budget` · **API:** `POST /api/budget/analyze`
 
 ### 4. 📈 CrewAI Stock Trend Analyzer
 A professional AI research desk generating comprehensive investment analysis reports.
 - Input a stock ticker → CrewAI orchestrates multiple AI agents that scrape the web, pull financial data (Yahoo Finance, Financial Datasets API), compute valuation ratios, and draft professional investment recommendations.
 - Multi-agent framework with Financial Analyst, Research Analyst, and Investment Advisor roles.
+- Intelligently handles both public equities and unlisted private companies (via alternate data discovery).
 - Markdown-rendered investment reports.
 - **Route:** `/stock` · **API:** `POST /api/portfolio/analyze`
 
